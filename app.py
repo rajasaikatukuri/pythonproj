@@ -1,8 +1,8 @@
 import streamlit as st
 import requests
 
-# FastAPI endpoint
-FASTAPI_URL = "http://127.0.0.1:8000/predict"
+# FastAPI endpoint (Replace this with your live FastAPI URL)
+FASTAPI_URL = "https://pythonproj-3rv7.onrender.com/predict"
 
 # Streamlit app title
 st.title("Breast Cancer Prediction")
@@ -10,6 +10,7 @@ st.title("Breast Cancer Prediction")
 # Input fields for user
 st.header("Enter Features")
 
+# Collect inputs for all features
 area_mean = st.number_input("Area Mean", min_value=0.0, value=1001.0)
 area_se = st.number_input("Area SE", min_value=0.0, value=153.36)
 area_worst = st.number_input("Area Worst", min_value=0.0, value=2018.98)
@@ -76,7 +77,6 @@ if st.button("Predict"):
         "texture_se": texture_se,
         "texture_worst": texture_worst
     }
-
 
     # Send POST request to FastAPI
     try:
