@@ -1,10 +1,20 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import joblib
 
 # Initialize the FastAPI app
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Use a specific domain in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Load the model
 try:
@@ -47,33 +57,21 @@ class InputFeatures(BaseModel):
     texture_se: float
     texture_worst: float
 
-# Root endpoint for health check
 @app.get("/")
 def read_root():
     return {"message": "Logistic Regression Prediction API is running!"}
 
-# Prediction endpoint
 @app.post("/predict")
 def predict(input_data: InputFeatures):
     try:
         # Convert input data to DataFrame
         input_df = pd.DataFrame([input_data.dict()])
-        
-        
-        # Ensure the model's features match the input schema
-        if hasattr(model, "feature_names_in_"):  # For scikit-learn models
-            expected_features = model.feature_names_in_
-            if list(input_df.columns) != list(expected_features):
-                raise ValueError(f"Input features do not match model features. Expected: {expected_features}")
-        
+
         # Perform prediction
         prediction = model.predict(input_df)
         diagnosis = "Malignant" if prediction[0] == 1 else "Benign"
-        
-        return {
-            "diagnosis": diagnosis  # "Malignant" or "Benign"
-        }
-    
+
+        return {"diagnosis": diagnosis}
+
     except Exception as e:
-        # Return an error if something goes wrong
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
